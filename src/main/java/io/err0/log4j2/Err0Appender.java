@@ -8,6 +8,7 @@ import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.plugins.*;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -42,27 +43,70 @@ public class Err0Appender extends AbstractAppender {
 
         @Override
         public Err0Appender build() {
-            return new Err0Appender(name, null);
+            return new Err0Appender(name, null, url, token);
         }
     }
 
+    private static ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>();
 
-    private static ConcurrentLinkedQueue<LogEvent> queue = new ConcurrentLinkedQueue<>();
-
-    protected Err0Appender(String name, Filter filter) {
+    protected Err0Appender(String name, Filter filter, String url, String token) {
         super(name, filter, null);
+        this.url = url;
+        this.token = token;
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                System.err.println("shutdown hook");
+                stopped = true;
+                while (pollQueue()) {}
+            }
+        }));
+        this.thread.setDaemon(true);
+        this.thread.start();
     }
-/*
-    @PluginFactory
-    public static Err0Appender createAppender(@PluginAttribute("name") String name, @PluginElement("Filter") final Filter filter) {
-        // TODO: pickup configuration for appender, or throw an exception
-        return new Err0Appender(name, filter);
-    }*/
+
+    private final String url;
+    private final String token;
+    private boolean stopped = false;
+
+    private boolean pollQueue() {
+        try {
+            ArrayList<String> list = new ArrayList<>();
+            String logEvent = null;
+            do {
+                logEvent = queue.poll();
+                if (null != logEvent) {
+                    list.add(logEvent);
+                }
+            } while (null != logEvent);
+            if (list.size() > 0) {
+                // TODO: send to ERR0
+                for (String event : list) {
+                    // TODO: run queue, pushing logs as a batch to error 0.
+                    System.err.println("ERR0\t" + event);
+                }
+                return true;
+            }
+        }
+        catch (Throwable t) {
+            System.err.println("ERR0\t" + t.getMessage());
+        }
+        return false;
+    }
+
+    private final Thread thread = new Thread() {
+        @Override
+        public void run() {
+            for (;!stopped;) {
+                boolean wasEmpty = pollQueue();
+                if (wasEmpty) {
+                    Thread.yield();
+                }
+            }
+        }
+    };
 
     @Override
     public void append(LogEvent event) {
-        queue.add(event);
-        // TODO: run queue, pushing logs as a batch to error 0.
-        System.err.println("ERR0\t" + event.getMessage().getFormattedMessage());
+        queue.add(event.getMessage().getFormattedMessage());
     }
 }
