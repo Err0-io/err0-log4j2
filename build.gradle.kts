@@ -41,6 +41,13 @@ dependencies {
 
   // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
   implementation("org.apache.logging.log4j:log4j-core:2.17.2")
+
+  // to silence library included slf4j noises:
+  //
+  // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+  implementation("org.slf4j:slf4j-api:1.7.36")
+  // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+  implementation("org.slf4j:slf4j-simple:1.7.36")
 }
 
 java {
