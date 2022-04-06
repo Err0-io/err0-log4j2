@@ -92,7 +92,7 @@ public class Err0Appender extends AbstractAppender {
         this.pattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
-                System.err.println("shutdown hook");
+                //System.err.println("shutdown hook");
                 stopped = true;
                 while (pollQueue()) {}
                 Err0Http.shutdown();
@@ -127,7 +127,7 @@ public class Err0Appender extends AbstractAppender {
                 JsonArray logs = new JsonArray();
                 bulkLog.add("logs", logs);
                 for (Err0Log log : list) {
-                    System.err.println("ERR0\t" + log.error_code + "\t" + log.ts + "\t" + log.message + "\t" + log.metadata.toString());
+                    //System.err.println("ERR0\t" + log.error_code + "\t" + log.ts + "\t" + log.message + "\t" + log.metadata.toString());
 
                     JsonObject o = new JsonObject();
                     o.addProperty("error_code", log.error_code);
@@ -142,7 +142,7 @@ public class Err0Appender extends AbstractAppender {
             }
         }
         catch (Throwable t) {
-            System.err.println("ERR0\t" + t.getMessage());
+            // ignore
         }
         return false;
     }

@@ -22,8 +22,10 @@ import org.apache.hc.core5.reactor.ssl.TlsDetails;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
 import java.net.URL;
+import java.util.Date;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Err0Http {
     final static CloseableHttpAsyncClient client;
@@ -51,11 +53,19 @@ public class Err0Http {
         client.start();
     }
     final static AtomicInteger inFlight = new AtomicInteger(0);
+    final static AtomicLong errorUntil = new AtomicLong(0L);
     public static boolean canCall() {
         return inFlight.get() < 4;
     }
     public static void call(final URL url, final String token, final JsonObject payload)
     {
+        long l = errorUntil.get();
+        if (l != 0) {
+            if (new Date().getTime() < l) {
+                return; // silently drop logs, there is an error on the http.
+            }
+        }
+
         inFlight.incrementAndGet();
         try {
             final HttpHost target = new HttpHost(url.getProtocol(), url.getHost(), url.getPort());
@@ -67,46 +77,39 @@ public class Err0Http {
                     .setBody(payload.toString(), ContentType.APPLICATION_JSON)
                     .build();
 
-            System.out.println("Executing request " + request);
             final Future<SimpleHttpResponse> future = client.execute(
                     SimpleRequestProducer.create(request),
                     SimpleResponseConsumer.create(),
                     clientContext,
                     new FutureCallback<SimpleHttpResponse>() {
-
                         @Override
                         public void completed(final SimpleHttpResponse response) {
                             inFlight.decrementAndGet();
-                            System.out.println(request + "->" + new StatusLine(response));
-                            final SSLSession sslSession = clientContext.getSSLSession();
-                            if (sslSession != null) {
-                                System.out.println("SSL protocol " + sslSession.getProtocol());
-                                System.out.println("SSL cipher suite " + sslSession.getCipherSuite());
-                            }
-                            System.out.println(response.getBody());
+                            errorUntil.set(0);
                         }
 
                         @Override
                         public void failed(final Exception ex) {
                             inFlight.decrementAndGet();
-                            System.out.println(request + "->" + ex);
+                            errorUntil.set(new Date().getTime() + (30L*60L*1000L)); // 30 minutes before a retry
                         }
 
                         @Override
                         public void cancelled() {
                             inFlight.decrementAndGet();
-                            System.out.println(request + " cancelled");
                         }
-
                     });
         }
         catch (Exception ex) {
-
+            // ignore
         }
     }
 
     public static void shutdown() {
-        System.out.println("Shutting down");
+        //System.out.println("Shutting down");
+        while (inFlight.get() > 0) {
+            Thread.yield();
+        }
         client.close(CloseMode.GRACEFUL);
     }
 }
