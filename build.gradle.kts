@@ -31,6 +31,7 @@ dependencies {
 
   // https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
   implementation("org.apache.httpcomponents.client5:httpclient5:5.1")
+  implementation("com.google.code.gson:gson:2.8.7")
 
   // the below are uncommented to allow me to use autocomplete to edit the
   // java unit test cases, please comment these out as the tests don't actually

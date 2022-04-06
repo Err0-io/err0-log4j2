@@ -18,11 +18,11 @@ public class Main {
 
             Logger logger = LogManager.getLogger(Main.class);
 
-            logger.debug("debug");
-            logger.info("info");
-            logger.warn("warn");
-            logger.error("error");
-            logger.fatal("fatal");
+            logger.debug("[EG-2] debug");
+            logger.info("[EG-3] info");
+            logger.warn("[EG-4] warn");
+            logger.error("[EG-5] error");
+            logger.fatal("[EG-6] fatal");
 
         }
         catch (Throwable t) {

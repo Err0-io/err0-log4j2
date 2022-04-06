@@ -8,7 +8,7 @@
         <Console name="console" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
-        <Err0Appender name="err0" token="2.KWfhf8nIm2zxSXkrRG1AiIVqzg9NZcvqGuFPlv9Nw02TePf6VJun6nQ-Uq3aVZksb8NKW_Wuo1BoCepFaSkVWC0AByA15sECWYyv_8TxtPp6ZGUUaWyvig.62_RsVr6V3WZd-H56B47ymJvMn2ps1NsbTvKexDj-Jc" url="https://open-source-dev.err0.io:8443/"></Err0Appender>
+        <Err0Appender name="err0" token="2.KWfhf8nIm2zxSXkrRG1AiIVqzg9NZcvqGuFPlv9Nw02TePf6VJun6nQ-Uq3aVZksb8NKW_Wuo1BoCepFaSkVWC0AByA15sECWYyv_8TxtPp6ZGUUaWyvig.62_RsVr6V3WZd-H56B47ymJvMn2ps1NsbTvKexDj-Jc" url="https://open-source-dev.err0.io:8443/" realm_uuid="ea3cd958-f46a-11eb-9a03-0242ac130003" prj_uuid="c8fd1ecc-7d10-11ec-90d6-0242ac120003" pattern="\[(EG-\d+)\]"></Err0Appender>
     </Appenders>
 
     <Loggers>
