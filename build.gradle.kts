@@ -21,9 +21,6 @@ application {
 }
 
 dependencies {
-  // https://mvnrepository.com/artifact/org.apache.ant/ant-launcher
-  implementation("org.apache.ant:ant-launcher:1.10.11") //needed by shadow
-
   //implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
   //implementation("io.vertx:vertx-web-client")
   //testImplementation("io.vertx:vertx-junit5")
