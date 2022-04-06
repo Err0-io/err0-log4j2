@@ -1,8 +1,8 @@
 package io.err0.log4j2;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
@@ -10,8 +10,9 @@ import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.plugins.*;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -77,7 +78,14 @@ public class Err0Appender extends AbstractAppender {
 
     protected Err0Appender(String name, Filter filter, String url, String token, String realm_uuid, String prj_uuid, String pattern) {
         super(name, filter, null);
-        this.url = url;
+        this.baseUrl = url;
+        try {
+            this.url = new URL(url + "~/api/bulk-log");
+        }
+        catch (MalformedURLException e) {
+            System.err.println(e.getMessage());
+            this.url = null;
+        }
         this.token = token;
         this.realm_uuid = realm_uuid;
         this.prj_uuid = prj_uuid;
@@ -87,13 +95,15 @@ public class Err0Appender extends AbstractAppender {
                 System.err.println("shutdown hook");
                 stopped = true;
                 while (pollQueue()) {}
+                Err0Http.shutdown();
             }
         }));
         this.thread.setDaemon(true);
         this.thread.start();
     }
 
-    private final String url;
+    private final String baseUrl;
+    private URL url;
     private final String token;
     private final String realm_uuid;
     private final String prj_uuid;
@@ -111,11 +121,23 @@ public class Err0Appender extends AbstractAppender {
                 }
             } while (null != logEvent);
             if (list.size() > 0) {
-                // TODO: send to ERR0
+                JsonObject bulkLog = new JsonObject();
+                bulkLog.addProperty("realm_uuid", realm_uuid);
+                bulkLog.addProperty("prj_uuid", prj_uuid);
+                JsonArray logs = new JsonArray();
+                bulkLog.add("logs", logs);
                 for (Err0Log log : list) {
-                    // TODO: run queue, pushing logs as a batch to error 0.
                     System.err.println("ERR0\t" + log.error_code + "\t" + log.ts + "\t" + log.message + "\t" + log.metadata.toString());
+
+                    JsonObject o = new JsonObject();
+                    o.addProperty("error_code", log.error_code);
+                    o.addProperty("ts", Long.toString(log.ts));
+                    o.addProperty("msg", log.message);
+                    o.add("metadata", log.metadata);
+
+                    logs.add(o);
                 }
+                Err0Http.call(url, token, bulkLog);
                 return true;
             }
         }
@@ -129,9 +151,13 @@ public class Err0Appender extends AbstractAppender {
         @Override
         public void run() {
             for (;!stopped;) {
-                boolean wasEmpty = pollQueue();
-                if (wasEmpty) {
+                if (!Err0Http.canCall()) {
                     Thread.yield();
+                } else {
+                    boolean wasEmpty = pollQueue();
+                    if (wasEmpty) {
+                        Thread.yield();
+                    }
                 }
             }
         }
