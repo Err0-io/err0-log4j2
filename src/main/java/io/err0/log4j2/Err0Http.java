@@ -18,6 +18,8 @@ import org.apache.hc.core5.http.nio.ssl.TlsStrategy;
 import org.apache.hc.core5.http2.HttpVersionPolicy;
 import org.apache.hc.core5.io.CloseMode;
 import org.apache.hc.core5.reactor.ssl.TlsDetails;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
@@ -28,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Err0Http {
+    final static Logger logger = LogManager.getLogger(Err0Http.class);
     final static CloseableHttpAsyncClient client;
     static {
         final TlsStrategy tlsStrategy = ClientTlsStrategyBuilder.create()
@@ -90,6 +93,7 @@ public class Err0Http {
 
                         @Override
                         public void failed(final Exception ex) {
+                            logger.warn("err0.io log publish failed.", ex);
                             inFlight.decrementAndGet();
                             errorUntil.set(new Date().getTime() + (30L*60L*1000L)); // 30 minutes before a retry
                         }
