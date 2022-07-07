@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -71,13 +72,15 @@ public class Err0Http {
 
         inFlight.incrementAndGet();
         try {
+            final byte[] body = payload.toString().getBytes(StandardCharsets.UTF_8);
             final HttpHost target = new HttpHost(url.getProtocol(), url.getHost(), url.getPort());
             final HttpClientContext clientContext = HttpClientContext.create();
             final SimpleHttpRequest request = SimpleRequestBuilder.post()
                     .setHttpHost(target)
                     .setPath(url.getPath())
                     .setHeader("Authorization", "Bearer " + token)
-                    .setBody(payload.toString(), ContentType.APPLICATION_JSON)
+                    .setHeader("Content-Length", Long.toString(body.length))
+                    .setBody(body, ContentType.APPLICATION_JSON)
                     .build();
 
             final Future<SimpleHttpResponse> future = client.execute(

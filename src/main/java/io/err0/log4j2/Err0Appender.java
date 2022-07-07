@@ -56,27 +56,15 @@ public class Err0Appender extends AbstractAppender {
         @Required
         private String url;
 
-        @PluginBuilderAttribute("realm_uuid")
-        @Required
-        private String realm_uuid;
-
-        @PluginBuilderAttribute("prj_uuid")
-        @Required
-        private String prj_uuid;
-
-        @PluginBuilderAttribute("pattern")
-        @Required
-        private String pattern;
-
         @Override
         public Err0Appender build() {
-            return new Err0Appender(name, null, url, token, realm_uuid, prj_uuid, pattern);
+            return new Err0Appender(name, null, url, token);
         }
     }
 
     private static ConcurrentLinkedQueue<Err0Log> queue = new ConcurrentLinkedQueue<>();
 
-    protected Err0Appender(String name, Filter filter, String url, String token, String realm_uuid, String prj_uuid, String pattern) {
+    protected Err0Appender(String name, Filter filter, String url, String token) {
         super(name, filter, null);
         this.baseUrl = url;
         try {
@@ -87,9 +75,6 @@ public class Err0Appender extends AbstractAppender {
             this.url = null;
         }
         this.token = token;
-        this.realm_uuid = realm_uuid;
-        this.prj_uuid = prj_uuid;
-        this.pattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 //System.err.println("shutdown hook");
@@ -105,9 +90,7 @@ public class Err0Appender extends AbstractAppender {
     private final String baseUrl;
     private URL url;
     private final String token;
-    private final String realm_uuid;
-    private final String prj_uuid;
-    private final Pattern pattern;
+    private final static Pattern pattern = Pattern.compile("\\[([A-Z][A-Z0-9]*-[0-9]+)\\]");
     private boolean stopped = false;
 
     private boolean pollQueue() {
@@ -122,8 +105,6 @@ public class Err0Appender extends AbstractAppender {
             } while (null != logEvent);
             if (list.size() > 0) {
                 JsonObject bulkLog = new JsonObject();
-                bulkLog.addProperty("realm_uuid", realm_uuid);
-                bulkLog.addProperty("prj_uuid", prj_uuid);
                 JsonArray logs = new JsonArray();
                 bulkLog.add("logs", logs);
                 for (Err0Log log : list) {
