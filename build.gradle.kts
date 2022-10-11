@@ -3,48 +3,13 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 plugins {
   java
   application
-  `maven-publish`
 }
 
 group = "io.err0.log4j2"
-version = "1.0.1-LOGCONTEXT"
+version = "1.0.2-SNAPSHOT"
 
 repositories {
   mavenCentral()
-}
-
-publishing {
-  publications {
-    create<MavenPublication>("mavenJava") {
-      artifactId = "err0-log4j2"
-      from(components["java"])
-      versionMapping {
-        usage("java-api") {
-          fromResolutionOf("runtimeClasspath")
-        }
-        usage("java-runtime") {
-          fromResolutionResult()
-        }
-      }
-      pom {
-        name.set("err0-log4j2")
-        description.set("Log4j2 adapter for err0")
-      }
-    }
-  }
-  repositories {
-    maven {
-      url = uri("https://gitlab.bluetrail.software/api/v4/projects/" + System.getenv("CI_PROJECT_ID") + "/packages/maven")
-      name = "BTS-GitLab"
-      credentials(HttpHeaderCredentials::class) {
-        name = "Job-Token"
-        value = System.getenv("CI_JOB_TOKEN")
-      }
-      authentication {
-        create<HttpHeaderAuthentication>("header")
-      }
-    }
-  }
 }
 
 val junitJupiterVersion = "5.7.0"
