@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.err0"
-version = "1.0.2-SNAPSHOT"
+version = "1.0.3"
 
 repositories {
   mavenCentral()
@@ -88,7 +88,8 @@ publishing {
   }
   repositories {
     maven {
-      url = uri("https://s01.oss.sonatype.org")
+      name = "sonatype"
+      setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
       credentials {
         username = project.property("sonatypeUsername") as String?
         password = project.property("sonatypePassword") as String?
@@ -98,7 +99,7 @@ publishing {
 }
 
 signing {
-    sign(publishing.publications["mavenJava"])
+    sign(publishing.publications)
 }
 
 tasks.javadoc {
