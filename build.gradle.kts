@@ -1,11 +1,12 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent.*
 
 plugins {
-  java
-  application
+  `java-library`
+  `maven-publish`
+  signing
 }
 
-group = "io.err0.log4j2"
+group = "io.err0"
 version = "1.0.2-SNAPSHOT"
 
 repositories {
@@ -15,10 +16,6 @@ repositories {
 val junitJupiterVersion = "5.7.0"
 
 val launcherClassName = "io.err0.log4j2.Main"
-
-application {
-  mainClass.set(launcherClassName)
-}
 
 dependencies {
   //implementation(platform("io.vertx:vertx-stack-depchain:$vertxVersion"))
@@ -50,11 +47,62 @@ dependencies {
 java {
   sourceCompatibility = JavaVersion.VERSION_1_8
   targetCompatibility = JavaVersion.VERSION_1_8
+  withJavadocJar()
+  withSourcesJar()
 }
 
 tasks.withType<Test> {
   useJUnitPlatform()
   testLogging {
     events = setOf(PASSED, SKIPPED, FAILED)
+  }
+}
+
+publishing {
+  publications {
+    create<MavenPublication>("mavenJava") {
+      pom {
+        name.set("err0-log4j2")
+        description.set("Connector for err0, log4j2")
+        url.set("https://github.com/Err0-io/err0-log4j2")
+        licenses {
+          license {
+            name.set("MIT license")
+            url.set("https://github.com/Err0-io/err0-log4j2/blob/main/LICENSE.txt")
+          }
+        }
+        developers {
+          developer {
+            id.set("err0package")
+            name.set("Err0.io packages")
+            email.set("package.err0.io")
+          }
+        }
+        scm {
+          connection.set("scm:git:https://github.com/Err0-io/err0-log4j2.git")
+          developerConnection.set("scm:git:ssh://git@github.com:Err0-io/err0-log4j2.git")
+          url.set("https://github.com/Err0-io/err0-log4j2")
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      url = uri("https://s01.oss.sonatype.org")
+      credentials {
+        username = project.property("sonatypeUsername") as String?
+        password = project.property("sonatypePassword") as String?
+      }
+    }
+  }
+}
+
+signing {
+    sign(publishing.publications["mavenJava"])
+}
+
+tasks.javadoc {
+  if (JavaVersion.current().isJava9Compatible) {
+    (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
   }
 }
