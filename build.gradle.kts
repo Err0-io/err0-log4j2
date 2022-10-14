@@ -34,14 +34,14 @@ dependencies {
   // testImplementation("org.slf4j:slf4j-api:1.7.31")
 
   // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
-  implementation("org.apache.logging.log4j:log4j-core:2.17.2")
+  compileOnly("org.apache.logging.log4j:log4j-core:2.17.2")
 
   // to silence library included slf4j noises:
   //
   // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-  implementation("org.slf4j:slf4j-api:1.7.36")
+  compileOnly("org.slf4j:slf4j-api:1.7.36")
   // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
-  implementation("org.slf4j:slf4j-simple:1.7.36")
+  compileOnly("org.slf4j:slf4j-simple:1.7.36")
 }
 
 java {
@@ -61,6 +61,7 @@ tasks.withType<Test> {
 publishing {
   publications {
     create<MavenPublication>("mavenJava") {
+      from(components["java"])
       pom {
         name.set("err0-log4j2")
         description.set("Connector for err0, log4j2")
@@ -75,7 +76,15 @@ publishing {
           developer {
             id.set("err0package")
             name.set("Err0.io packages")
-            email.set("package.err0.io")
+            email.set("package@err0.io")
+          }
+        }
+        versionMapping {
+          //usage("java-api") {
+          //  fromResolutionOf("runtimeClasspath")
+          //}
+          usage("java-runtime") {
+            fromResolutionResult()
           }
         }
         scm {
