@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.err0"
-version = "1.0.3"
+version = "1.0.4"
 
 repositories {
   mavenCentral()
@@ -23,8 +23,8 @@ dependencies {
   //testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
 
-  // https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
-  implementation("org.apache.httpcomponents.client5:httpclient5:5.1")
+// https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+  implementation("com.squareup.okhttp3:okhttp:4.10.0")
   implementation("com.google.code.gson:gson:2.8.7")
 
   // the below are uncommented to allow me to use autocomplete to edit the
