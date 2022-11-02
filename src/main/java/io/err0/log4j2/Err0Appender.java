@@ -148,7 +148,7 @@ public class Err0Appender extends AbstractAppender {
     public void append(LogEvent event) {
         final String formattedMessage = event.getMessage().getFormattedMessage();
         final Matcher matcher = pattern.matcher(formattedMessage);
-        if (matcher.find()) {
+        while (matcher.find()) {
             final String error_code = matcher.group(1);
             final long ts = event.getTimeMillis();
             final JsonObject metadata = new JsonObject();
