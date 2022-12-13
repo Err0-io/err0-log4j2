@@ -25,16 +25,12 @@ import java.util.regex.Pattern;
 public class Err0Appender extends AbstractAppender {
 
     public static class Err0Log {
-        public Err0Log(final String error_code, final long ts, final String message, final JsonObject metadata) {
+        public Err0Log(final String error_code, final long ts) {
             this.error_code = error_code;
             this.ts = ts;
-            this.message = message;
-            this.metadata = metadata;
         }
         public final String error_code;
         public final long ts;
-        public final String message;
-        public final JsonObject metadata;
     }
 
     @PluginBuilderFactory
@@ -113,8 +109,6 @@ public class Err0Appender extends AbstractAppender {
                     JsonObject o = new JsonObject();
                     o.addProperty("error_code", log.error_code);
                     o.addProperty("ts", Long.toString(log.ts));
-                    o.addProperty("msg", log.message);
-                    o.add("metadata", log.metadata);
 
                     logs.add(o);
                 }
@@ -151,16 +145,7 @@ public class Err0Appender extends AbstractAppender {
         while (matcher.find()) {
             final String error_code = matcher.group(1);
             final long ts = event.getTimeMillis();
-            final JsonObject metadata = new JsonObject();
-            final JsonObject log4j2Metadata = new JsonObject();
-            final Level level = event.getLevel();
-            final StackTraceElement source = event.getSource();
-            log4j2Metadata.addProperty("level", level.name());
-            log4j2Metadata.addProperty("source_class", source.getClassName());
-            log4j2Metadata.addProperty("source_file", source.getFileName());
-            log4j2Metadata.addProperty("source_line", source.getLineNumber());
-            metadata.add("log4j2", log4j2Metadata);
-            queue.add(new Err0Log(error_code, ts, formattedMessage, metadata));
+            queue.add(new Err0Log(error_code, ts));
         }
     }
 }

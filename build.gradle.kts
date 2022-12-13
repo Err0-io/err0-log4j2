@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.err0"
-version = "1.1.0"
+version = "1.2.0"
 
 repositories {
   mavenCentral()
@@ -34,14 +34,7 @@ dependencies {
   // testImplementation("org.slf4j:slf4j-api:1.7.31")
 
   // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
-  compileOnly("org.apache.logging.log4j:log4j-core:2.17.2")
-
-  // to silence library included slf4j noises:
-  //
-  // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-  compileOnly("org.slf4j:slf4j-api:1.7.36")
-  // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
-  compileOnly("org.slf4j:slf4j-simple:1.7.36")
+  implementation("org.apache.logging.log4j:log4j-core:2.17.2")
 }
 
 java {
